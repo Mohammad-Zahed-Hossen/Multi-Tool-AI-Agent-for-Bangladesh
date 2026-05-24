@@ -12,3 +12,4 @@ venv/
 
 # Local test files that should not be pushed to GitHub
 test_*.py
+check_db.py
