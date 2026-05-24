@@ -1,0 +1,17 @@
+langchain
+langchain-community
+langchain-openai
+langchain-google-genai
+langchain-core
+langchain-experimental
+
+pandas
+sqlalchemy
+
+tavily-python
+
+python-dotenv
+tabulate
+
+datasets
+huggingface_hub
