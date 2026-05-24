@@ -4,18 +4,10 @@ import os
 
 load_dotenv()
 
-
-# =========================
-# LOAD TAVILY CLIENT
-# =========================
 client = TavilyClient(
     api_key=os.getenv("TAVILY_API_KEY")
 )
 
-
-# =========================
-# WEB SEARCH FUNCTION
-# =========================
 def web_search(query):
 
     try:

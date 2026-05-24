@@ -7,28 +7,16 @@ import os
 
 load_dotenv()
 
-
-# =========================
-# LOAD LLM
-# =========================
 llm = ChatGoogleGenerativeAI(
     model="gemini-2.5-flash",
     temperature=0,
     google_api_key=os.getenv("GOOGLE_API_KEY")
 )
 
-
-# =========================
-# CONNECT DATABASE
-# =========================
 db = SQLDatabase.from_uri(
     "sqlite:///databases/institutions.db"
 )
 
-
-# =========================
-# CREATE SQL CHAIN
-# =========================
 institutions_chain = SQLDatabaseChain.from_llm(
     llm=llm,
     db=db,
@@ -37,10 +25,6 @@ institutions_chain = SQLDatabaseChain.from_llm(
     use_query_checker=True
 )
 
-
-# =========================
-# TOOL FUNCTION
-# =========================
 def query_institutions(question):
 
     try:
