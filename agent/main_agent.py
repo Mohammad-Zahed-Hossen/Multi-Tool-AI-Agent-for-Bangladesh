@@ -3,7 +3,8 @@ import os
 
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.tools import Tool
-from langchain.agents import create_react_agent, AgentExecutor
+from langchain.agents import AgentExecutor
+from langchain.agents.react.agent import create_react_agent
 from langchain import hub
 
 
