@@ -1,5 +1,9 @@
-from dotenv import load_dotenv
+import sys
 import os
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from dotenv import load_dotenv
 
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.tools import Tool
@@ -7,35 +11,19 @@ from langchain.agents import AgentExecutor
 from langchain.agents.react.agent import create_react_agent
 from langchain import hub
 
-
-# =========================
-# IMPORT CUSTOM TOOLS
-# =========================
 from tools.institutions_tool import query_institutions
 from tools.hospitals_tool import query_hospitals
 from tools.restaurants_tool import query_restaurants
 from tools.web_search_tool import web_search
 
-
-# =========================
-# LOAD ENV VARIABLES
-# =========================
 load_dotenv()
 
-
-# =========================
-# LOAD GEMINI MODEL
-# =========================
 llm = ChatGoogleGenerativeAI(
-    model="gemini-2.5-flash-lite",
+    model="gemini-2.0-flash",
     temperature=0,
     google_api_key=os.getenv("GOOGLE_API_KEY")
 )
 
-
-# =========================
-# CREATE TOOLS
-# =========================
 tools = [
 
     Tool(
@@ -99,23 +87,14 @@ Useful for:
     )
 ]
 
-
-# =========================
-# INITIALIZE AGENT
-# =========================
 prompt = hub.pull("hwchase17/react")
 
 agent = create_react_agent(llm, tools, prompt)
 
 agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True, handle_parsing_errors=True)
 
-
-# =========================
-# CHAT LOOP
-# =========================
 print("\nMulti-Tool AI Agent for Bangladesh")
 print("Type 'exit' to quit.\n")
-
 
 while True:
 
@@ -135,3 +114,4 @@ while True:
     except Exception as e:
 
         print(f"\nError: {str(e)}")
+
