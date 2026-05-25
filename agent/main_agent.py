@@ -4,12 +4,11 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from dotenv import load_dotenv
+import json
 
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.tools import Tool
-from langchain.agents.agent import AgentExecutor
-from langchain.agents.react.agent import create_react_agent
-from langchain import hub
+from langchain_core.messages import HumanMessage
 
 from tools.institutions_tool import query_institutions
 from tools.hospitals_tool import query_hospitals
@@ -19,85 +18,95 @@ from tools.web_search_tool import web_search
 load_dotenv()
 
 llm = ChatGoogleGenerativeAI(
-    model="gemini-2.0-flash",
+    model="gemini-2.5-flash-lite",
     temperature=0,
     google_api_key=os.getenv("GOOGLE_API_KEY")
 )
 
 tools = [
-
     Tool(
         name="InstitutionsDBTool",
         func=query_institutions,
         description="""
-Useful for questions about:
-- schools
+MANDATORY tool for ANY query related to:
 - colleges
+- schools
 - universities
 - madrasas
 - educational institutions
 - EIIN
-- MPO status
-- institutional statistics
-- educational divisions/districts
+- MPO
+- institution counts
+- institutions in districts/divisions
+- education statistics
+
+DO NOT answer from general knowledge.
+ALWAYS use this tool for institution-related questions.
 """
     ),
-
     Tool(
         name="HospitalsDBTool",
         func=query_hospitals,
         description="""
-Useful for questions about:
+MANDATORY tool for ANY query related to:
 - hospitals
 - clinics
 - healthcare facilities
 - private hospitals
 - government hospitals
 - hospitals in districts/divisions
+- healthcare statistics
+
+DO NOT answer from general knowledge.
+ALWAYS use this tool for hospital-related questions.
 """
     ),
-
     Tool(
         name="RestaurantsDBTool",
         func=query_restaurants,
         description="""
-Useful for questions about:
+MANDATORY tool for ANY query related to:
 - restaurants
 - food places
-- ratings
-- restaurant locations
+- restaurant ratings
 - restaurant reviews
-- top rated restaurants
+- top restaurants
+- restaurant locations
+
+DO NOT answer from general knowledge.
+ALWAYS use this tool for restaurant-related questions.
 """
     ),
-
     Tool(
         name="WebSearchTool",
         func=web_search,
         description="""
-Useful for:
+Use ONLY for:
 - general knowledge
-- Bangladesh healthcare policy
+- Bangladesh policies
 - DGHS
-- cultural context
 - definitions
-- government policies
-- topics NOT available in databases
+- cultural context
+- topics NOT present in databases
+
+DO NOT use for institution/hospital/restaurant statistics.
 """
     )
 ]
 
-prompt = hub.pull("hwchase17/react")
+tool_dict = {tool.name: tool for tool in tools}
 
-agent = create_react_agent(llm, tools, prompt)
-
-agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True, handle_parsing_errors=True)
+def process_input(user_input):
+    try:
+        response = llm.invoke([HumanMessage(content=user_input)])
+        return response.content
+    except Exception as e:
+        return f"Error: {str(e)}"
 
 print("\nMulti-Tool AI Agent for Bangladesh")
 print("Type 'exit' to quit.\n")
 
 while True:
-
     user_input = input("You: ")
 
     if user_input.lower() == "exit":
@@ -105,13 +114,10 @@ while True:
         break
 
     try:
-
-        response = agent_executor.invoke({"input": user_input})
-
+        response = process_input(user_input)
         print("\nAI Agent:")
-        print(response["output"])
-
+        print(response)
     except Exception as e:
-
         print(f"\nError: {str(e)}")
+
 
